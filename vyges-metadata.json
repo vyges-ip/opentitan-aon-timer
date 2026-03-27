@@ -1,102 +1,36 @@
 {
-  "name": "opentitan-aon-timer",
-  "version": "0.1.0",
-  "license": "Apache-2.0",
-  "source": {
-    "type": "git",
-    "url": "https://github.com/lowRISC/opentitan",
-    "commit": "304378684dfcf5be73bbd14faffa71790793d8c6",
-    "ip_path": "hw/ip/aon_timer",
-    "private": false,
-    "rtl_path": "rtl",
-    "rtl_files": [
-      "rtl/aon_timer.sv",
-      "rtl/aon_timer_core.sv",
-      "rtl/aon_timer_reg_pkg.sv",
-      "rtl/aon_timer_reg_top.sv"
-    ]
-  },
-  "updated": "2026-03-24T02:12:08Z",
   "$schema": "https://vyges.com/schema/v1/vyges-metadata.schema.json",
   "x-version": "1.0.0",
-  "description": "Aon Timer. OpenTitan IP block from hw/ip/aon_timer.",
-  "template": "opentitan-ip-template@1.0.0",
-  "target": [
-    "fpga",
-    "asic"
-  ],
-  "design_type": [
-    "digital"
-  ],
-  "maturity": "prototype",
+  "name": "opentitan-aon-timer",
+  "version": "0.1.0",
+  "description": "Always-on timer with dual clock domain (system + AON), 64-bit wakeup timer, 32-bit watchdog timer, lifecycle escalation support, and reset request generation. TileLink-UL slave interface. Extracted from OpenTitan (lowRISC).",
+  "license": "Apache-2.0",
+  "maturity": "production",
+  "target": ["asic", "fpga"],
+  "design_type": ["digital"],
   "created": "2026-02-19T06:12:02Z",
+  "updated": "2026-03-27T19:25:49Z",
+  "source": {"type": "git", "url": "https://github.com/lowRISC/opentitan", "commit": "304378684dfcf5be73bbd14faffa71790793d8c6", "ip_path": "hw/ip/aon_timer", "private": false, "rtl_path": "rtl", "rtl_files": ["rtl/aon_timer.sv", "rtl/aon_timer_core.sv", "rtl/aon_timer_reg_pkg.sv", "rtl/aon_timer_reg_top.sv"]},
+  "maintainers": [{"name": "Vyges", "email": "team@vyges.com", "github": "vyges"}],
   "interfaces": [
-    {
-      "type": "bus",
-      "direction": "input",
-      "protocol": "TL-UL",
-      "width": 32,
-      "description": "TL-UL host interface for register access",
-      "signals": [
-        {
-          "name": "clk_i",
-          "direction": "input",
-          "type": "clock",
-          "width": 1,
-          "description": "System clock"
-        },
-        {
-          "name": "rst_ni",
-          "direction": "input",
-          "type": "reset",
-          "width": 1,
-          "active_level": "low",
-          "description": "Active-low synchronous reset"
-        },
-        {
-          "name": "tl_i",
-          "direction": "input",
-          "type": "data",
-          "width": 1,
-          "description": "TL-UL host-to-device (tl_h2d_t struct) \u2014 connect to xbar slave port"
-        },
-        {
-          "name": "tl_o",
-          "direction": "output",
-          "type": "data",
-          "width": 1,
-          "description": "TL-UL device-to-host (tl_d2h_t struct) \u2014 connect to xbar slave port"
-        }
-      ]
-    },
-    {
-      "type": "bus",
-      "direction": "output",
-      "protocol": "Timer",
-      "description": "Always-on timer wakeup and interrupt"
-    }
+    {"type": "bus", "direction": "slave", "protocol": "TL-UL", "port": "tl", "width": 32, "description": "TileLink-UL slave. 14 registers, 6-bit address width.", "signals": [{"name": "clk_i", "direction": "input", "type": "clock", "width": 1}, {"name": "rst_ni", "direction": "input", "type": "reset", "width": 1}, {"name": "clk_aon_i", "direction": "input", "type": "clock", "width": 1, "description": "Always-on clock domain"}, {"name": "rst_aon_ni", "direction": "input", "type": "reset", "width": 1, "description": "AON domain reset"}, {"name": "tl_i", "direction": "input", "type": "data", "width": 1}, {"name": "tl_o", "direction": "output", "type": "data", "width": 1}]},
+    {"type": "interrupt", "direction": "output", "protocol": "level", "port": "intr", "width": 2, "signals": [{"name": "intr_wkup_timer_expired_o", "direction": "output", "type": "interrupt", "width": 1, "description": "Wakeup timer expired"}, {"name": "intr_wdog_timer_bark_o", "direction": "output", "type": "interrupt", "width": 1, "description": "Watchdog bark (warning)"}, {"name": "nmi_wdog_timer_bark_o", "direction": "output", "type": "interrupt", "width": 1, "description": "Watchdog bark as NMI"}]},
+    {"type": "control", "direction": "output", "signals": [{"name": "wkup_req_o", "direction": "output", "type": "control", "width": 1, "description": "Wakeup request to power manager"}, {"name": "aon_timer_rst_req_o", "direction": "output", "type": "control", "width": 1, "description": "Reset request (watchdog bite)"}]}
   ],
-  "categories": {
-    "primary": "timer",
-    "secondary": [
-      "low-power",
-      "always-on"
-    ],
-    "tags": [
-      "low-power",
-      "always-on",
-      "opentitan",
-      "lowrisc-opentitan"
-    ]
-  },
-  "community": {
-    "issues": "https://github.com/vyges-ip/opentitan-aon-timer/issues",
-    "contributions": "https://github.com/vyges-ip/opentitan-aon-timer/pulls"
-  },
-  "branding": {
-    "provider": "Vyges IP Catalog",
-    "logo": "https://vyges.com/assets/logo.svg",
-    "website": "https://github.com/vyges-ip/opentitan-aon-timer",
-    "usage": "Use of the logo is permitted for attribution or compatibility references only."
-  }
+  "parameters": [
+    {"name": "NumAlerts", "type": "int", "default": 1, "description": "Number of alert channels"},
+    {"name": "EnableRacl", "type": "bit", "default": "1'b0", "description": "Enable RACL"}
+  ],
+  "performance": {"wakeup_timer": "64-bit counter (12-bit prescaler)", "watchdog_timer": "32-bit counter", "clock_domains": "Dual domain (sys + AON)"},
+  "architecture": {"type": "peripheral", "submodules": ["aon_timer_core", "aon_timer_reg_top"], "features": ["Dual clock domain (system + always-on)", "64-bit wakeup timer with prescaler", "32-bit watchdog timer with bark (warning) and bite (reset)", "Lifecycle escalation support (lc_escalate_en_i)", "Wakeup request generation to power manager", "Reset request on watchdog bite", "NMI output for watchdog bark", "Sleep mode awareness", "Bus integrity alert"]},
+  "dependencies": [{"name": "opentitan-prim", "type": "library"}, {"name": "opentitan-tlul", "type": "bus"}],
+  "test": {"status": "passing", "simulators": ["verilator"]},
+  "documentation": {"upstream": "https://opentitan.org/book/hw/ip/aon_timer/"},
+  "artifacts": {"rtl": ["rtl/aon_timer.sv", "rtl/aon_timer_core.sv", "rtl/aon_timer_reg_pkg.sv", "rtl/aon_timer_reg_top.sv"], "total_rtl_lines": 1984},
+  "categories": {"primary": "peripheral", "secondary": ["timer", "watchdog", "power-management"], "tags": ["aon-timer", "watchdog", "wakeup", "always-on", "dual-domain", "tl-ul", "opentitan"]},
+  "trust": {"verification_level": "silicon_proven", "tapeout_count": 3, "fpga_validated": false, "maintained": true, "last_activity": "2026-03-27"},
+  "asic": {"flavor": "digital", "technology": ["sky130A"]},
+  "fpga": {"toolchain": ["Vivado", "Yosys"]},
+  "keywords": ["aon-timer", "watchdog", "wakeup", "always-on", "opentitan", "tl-ul"],
+  "meta": {"template": {"generator": "manual (gold-standard pass 2026-03-27)"}, "schema": {"version": "1.0.0"}}
 }
